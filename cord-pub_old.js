@@ -4,37 +4,8 @@ Assumes d3 and Google's japi have both been loaded.  For example,
     <script type="text/javascript" src="http://www.google.com/jsapi?fake=.js" charset="utf-8"></script>
 */
 
-if (typeof google !== 'undefined') {
-    console.log('google jsapi not found');
-    console.log('run: <script type="text/javascript" src="http://www.google.com/jsapi?fake=.js" charset="utf-8"></script>');
-}
-if (typeof d3 !== 'undefined') {
-    console.log('d3 not found');
-    console.log('run: <script type="text/javascript" src="http://d3js.org/d3.v2.js" charset="utf-8"></script>');
-}
 
-
-
-var cordpub = function() {
-
-
-    google.load('visualization', '1');
-
-    function createMember() {
-        // [...]
-    }
-
-    function getMemberDetails() {
-        // [...]
-    }
-    return {
-        create: createMember,
-        get: getMemberDetails
-    }
-}();
-
-
-
+google.load('visualization', '1');
 
 
 google.setOnLoadCallback(drawVisualizations_start);
@@ -148,19 +119,19 @@ function mouseHoverSVG(i, out) {
 }
 
 function nameClick(i) {
-    var form = document.getElementById('aut' + i);
-    var name = form.innerHTML;
-    var cols = ['N', 'or O', 'or P', 'or Q', 'or R', 'or S'];
-    var str = '';
-    for (kk = 0; kk < cols.length; kk++) {
-        str = str + cols[kk] + "='" + name + "' ";
-    }
-    drawVis('SELECT * where ' + str + ' order by A asc,D desc, E desc', 'all', name);
+        var form = document.getElementById('aut'+i);
+        var name = form.innerHTML;
+        var cols = ['N', 'or O', 'or P', 'or Q', 'or R', 'or S'];
+        var str = '';
+        for (kk = 0; kk < cols.length; kk++) {
+            str = str + cols[kk] + "='" + name + "' ";
+        }
+    drawVis('SELECT * where ' + str + ' order by A asc,D desc, E desc', 'all',name);
 }
 
 
 
-function drawVis(qText, element, name) {
+function drawVis(qText, element,name) {
 
     var query = new google.visualization.Query('http://docs.google.com/spreadsheet/tq?key=0AqVSrKawR254dENJa2N1TUpWdF9QLXZFaFVtMVN0ZWc&pub=1');
 
@@ -182,7 +153,7 @@ function drawVis(qText, element, name) {
     div.style.backgroundColor = '#000';
     div.style.color = '#fff';
 
-    d3.select('#qq').text('Year: ' + ((element == 'all') ? 'All' : element) + '; Name: ' + ((name == 'R.J. Baxley') ? 'All' : name));
+d3.select('#qq').text('Year: '+ ((element=='all')?'All':element)+'; Name: '+((name=='R.J. Baxley')?'All':name));
 }
 
 
@@ -328,7 +299,7 @@ myvisualization.MyTable.prototype.draw = function(data, options) {
     html.push('<tr>');
     html.push('<td align="right" valign="top">');
 
-    authors.setVal('R.J. Baxley', 'R.J. Baxley', 0);
+        authors.setVal('R.J. Baxley', 'R.J. Baxley', 0);
     for (var row = 0; row < data.getNumberOfRows(); row++) {
         var str = [];
 
@@ -444,9 +415,9 @@ myvisualization.MyTable.prototype.draw = function(data, options) {
         for (var kk = arow; kk < col + 1; kk++) {
             var num = col - arow + 1;
             //set authors matrix
-            for (var jj = arow; jj < col + 1; jj++) {
-                var cur = authors.getVal(data.getFormattedValue(row, kk), data.getFormattedValue(row, jj));
-                authors.setVal(data.getFormattedValue(row, kk), data.getFormattedValue(row, jj), 1 / (num) + cur);
+                for (var jj = arow; jj < col + 1; jj++) {
+                        var cur = authors.getVal(data.getFormattedValue(row, kk), data.getFormattedValue(row, jj));
+                        authors.setVal(data.getFormattedValue(row, kk), data.getFormattedValue(row, jj), 1 / (num ) + cur);
             }
         }
 
@@ -486,68 +457,68 @@ eHtml = function(text) {
 
 function twoDArr() {
     this.arr = {};
+}
 
-    setVal = function(row, col, val) {
-        if (row in this.arr) {
-            var temp = this.arr[row];
-        } else {
-            var temp = {};
-        }
-        temp[col] = val;
-        this.arr[row] = temp;
+
+twoDArr.prototype.setVal = function(row, col, val) {
+    if (row in this.arr) {
+        var temp = this.arr[row];
+    } else {
+        var temp = {};
     }
-
-    getVal = function(row, col) {
-        var val = 0;
-        if (row in this.arr) {
-            if (col in this.arr[row]) {
-                var val = this.arr[row][col];
-            }
-        }
-        return val;
-    }
-
-    printVals = function(roundfac) {
-        var html = [];
-        html.push('[');
-        for (var kk in this.arr) {
-            html.push(kk + ' [');
-            for (var jj in this.arr[kk]) {
-                html.push(jj + ':' + Math.round(this.arr[kk][jj] * roundfac) / roundfac + ',');
-            }
-            html.push(']<br />');
-        }
-        html.push(']');
-        return (html.join(''));
-    }
-
-    fill = function() {
-        for (var kk in this.arr) {
-            for (var jj in this.arr) {
-                this.setVal(kk, jj, this.getVal(kk, jj));
-            }
+    temp[col] = val;
+    this.arr[row] = temp;
+}
+twoDArr.prototype.getVal = function(row, col) {
+    var val = 0;
+    if (row in this.arr) {
+        if (col in this.arr[row]) {
+            var val = this.arr[row][col];
         }
     }
+    return val;
+}
 
-    ob2arr = function() {
-        var out = [];
-        var names = [];
-        var row = 0;
-        for (var kk in this.arr) {
-            var col = 0;
-            var temp = [];
-            for (var jj in this.arr) {
-                temp[col] = this.getVal(kk, jj);
-                col++;
-            }
-            out[row] = temp;
-            names[row] = kk;
-            row++;
+
+twoDArr.prototype.printVals = function(roundfac) {
+    var html = [];
+    html.push('[');
+    for (var kk in this.arr) {
+        html.push(kk + ' [');
+        for (var jj in this.arr[kk]) {
+            html.push(jj + ':' + Math.round(this.arr[kk][jj] * roundfac) / roundfac + ',');
         }
-        return {
-            mat: out,
-            labels: names
-        };
+        html.push(']<br />');
+    }
+    html.push(']');
+    return (html.join(''));
+}
+
+twoDArr.prototype.fill = function() {
+    for (var kk in this.arr) {
+        for (var jj in this.arr) {
+            this.setVal(kk, jj, this.getVal(kk, jj));
+        }
     }
 }
 
+twoDArr.prototype.ob2arr = function() {
+    var out = [];
+    var names = [];
+    var row = 0;
+    for (var kk in this.arr) {
+        var col = 0;
+        var temp = [];
+        for (var jj in this.arr) {
+            temp[col] = this.getVal(kk, jj);
+            col++;
+        }
+        out[row] = temp;
+        names[row] = kk;
+        row++;
+    }
+    return {
+        mat: out,
+        labels: names
+    };
+}
