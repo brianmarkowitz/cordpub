@@ -1,0 +1,40 @@
+td {
+    padding: 5px;
+}
+#chart {
+    font: 10px sans-serif;
+    float: left;
+}
+.chord path {
+    fill-opacity: .67;
+    stroke: #000;
+    stroke-width: .5px;
+}
+#all {
+    background-color: black;
+    color: white;
+    float: left;
+    padding: 5px;
+}
+.bars {
+    background-color: LightCoral;
+    padding: 5px;
+    float: left;
+}
+#nameHodler {
+    float: left;
+    padding: 30px;
+}
+#visualization #qq {
+    padding: 5px;
+    clear: both;
+}
+#qq {
+    clear: both;
+}
+#nameTitle {
+    font-weight: bold;
+}
+#yearTitle {
+    font-weight: bold;
+}
