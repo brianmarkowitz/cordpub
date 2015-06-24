@@ -31,6 +31,8 @@ td {
 }
 #qq {
     clear: both;
+    width: 500px;
+    height: 500px;
 }
 #nameTitle {
     font-weight: bold;
@@ -38,3 +40,32 @@ td {
 #yearTitle {
     font-weight: bold;
 }
+.author_box {
+    cursor: default;
+    width: 120px;
+    padding: 0px 5px;
+    float: left;
+}
+
+.div-table{
+  display:table;
+  width:auto;
+  border-spacing:5px;/*cellspacing:poor IE support for  this*/
+}
+.row{
+  display:table-row;
+  width:auto;
+  clear:both;
+}
+.col{
+  display:inline-block;
+}
+.citation{
+  width: 93%;
+  vertical-align: top;
+}
+.type_count{
+  width: 7%;
+}
+
+
