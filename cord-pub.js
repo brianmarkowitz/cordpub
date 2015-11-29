@@ -2,6 +2,9 @@
 Assumes d3 and Google's japi have both been loaded.  For example,
     <script type="text/javascript" src="http://d3js.org/d3.v2.js" charset="utf-8"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi?fake=.js" charset="utf-8"></script>
+
+Author: Bob Baxley, bob@rjbaxley.com
+License: MIT
 */
 
 var cordpub = new pubDoc();
@@ -18,29 +21,40 @@ if (typeof d3 == 'undefined') {
 
 google.load('visualization', '1');
 
-var colorRange = d3.scale.category20c();
 
-function unique1(arr) {
-    var u = {},
-        a = [];
-    for (var i = 0, l = arr.length; i < l; ++i) {
-        if (!u.hasOwnProperty(arr[i])) {
-            a.push(arr[i]);
-            u[arr[i]] = 1;
-        }
+function columnToLetter(column) {
+    column += 1;
+    var temp, letter = '';
+    while (column > 0) {
+        temp = (column - 1) % 26;
+        letter = String.fromCharCode(temp + 65) + letter;
+        column = (column - temp - 1) / 26;
     }
-    return a;
+    return letter;
 }
 
-var columns = [];
-
-var formats = {
-    "Journal": '<div class="row"><div class="type_count col">[J%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," <i>%%Venue%%</i>, vol. %%Volume%%, no. %%Number%%, pp. %%Pages%%, %%Month%% %%Year%%.</div></div>',
-    "Patent": '<div class="row"><div class="type_count col">[P%%Counter%%]</div><div class="citation col">%%Authors%%, %%Title%%, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>',
-    "Conference": '<div class="row"><div class="type_count col">[C%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," in <i>Proc. %%Venue%%</i>, pp. %%Pages%%, %%Location%%, %%Month%% %%Year%%.</div></div>',
-    "Thesis": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">%%Authors%%, <i>%%Title%%</i>, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
+function range(start, stop, step){
+  var a=[start], b=start;
+  while(b<stop){b+=step;a.push(b)}
+  return a;
 };
 
+function columnifyQuery(queryText) {
+    /*
+    Converts a string like
+        "select * order by %%Author%%"
+    to
+        "select * order by B"
+    */
+    for (var col = 0; col < cordpub.columsArray.length; col++) {
+        // replace value in template
+        queryText = queryText.replace(
+            "%%" + cordpub.columsArray[col] + "%%",
+            columnToLetter(col));
+    }
+    return queryText
+
+}
 
 var formatValues = {
     Authors: function(value) {
@@ -65,7 +79,7 @@ var formatValues = {
 
 
 
-function pubDoc() {
+function pubDoc(key) {
     this.pubs = {};
     this.authors = {};
     this.year = {};
@@ -75,11 +89,70 @@ function pubDoc() {
     this.columsArray = [];
 }
 
-pubDoc.prototype.addKey = function(key) {
+pubDoc.prototype.init = function(
+    key,
+    formats,
+    author_list_div,
+    cord_plot_div,
+    colorRange
+) {
+    /*
+
+    INPUTS
+    key = google sheets key
+        add "&gid=[gid]" to query a sheet other than the first sheet
+    formats = json of publication type templates
+    author_list_div = name of div id for author list; or false to not show
+    cord_plot_div = name of div id for cord plot; or false to not show
+    colorRange = list of colors or d3 color scale
+
+
+    Example arguments:
+    colorRange = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+      or
+    colorRange = d3.scale.category10()
+
+    formats = {
+            "Journal": '<div class="row"><div class="type_count col">[J%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," <i>%%Venue%%</i>, vol. %%Volume%%, no. %%Number%%, pp. %%Pages%%, %%Month%% %%Year%%.</div></div>',
+            "Patent": '<div class="row"><div class="type_count col">[P%%Counter%%]</div><div class="citation col">%%Authors%%, %%Title%%, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
+        }
+
+    */
+
+
+    // google sheets key
     this.key = key;
+
+    // json of formats for each document type
+    // prints data to div with id equal to json key
+    this.formats = formats;
+
+    this.author_list_div = author_list_div;
+    this.cord_plot_div = cord_plot_div;
+
+    if (colorRange) {
+        // convert list to d3 color scale
+        if (typeof colorRange != "function") {
+            colorRange = d3.scale.ordinal()
+              .domain(range(0,colorRange.length,1))
+              .range(colorRange);
+        }
+    }
+    this.colorRange = colorRange
+
+    this.queryBase(
+        "select * limit 1",
+        function(dataTable) {
+            cordpub.dataTable = dataTable;
+            cordpub.createLabels();
+            cordpub.getAllPubs();
+
+        }
+    );
 }
 
 pubDoc.prototype.createLabels = function() {
+    // loop through publication types and store as two jsons
     for (var col = 0; col < cordpub.dataTable.getNumberOfColumns(); col++) {
         columnLabel = cordpub.dataTable.getColumnLabel(col);
         cordpub.columsByName[columnLabel] = col;
@@ -98,30 +171,48 @@ pubDoc.prototype.createLabels = function() {
 pubDoc.prototype.initalizeTypeData = function() {
     cordpub.typeCount = {};
     cordpub.stringsByType = {}
-    for (var key in formats) {
-        if (formats.hasOwnProperty(key)) {
+    for (var key in cordpub.formats) {
+        if (cordpub.formats.hasOwnProperty(key)) {
             cordpub.typeCount[key] = 0;
             cordpub.stringsByType[key] = [];
         }
     }
 }
 
-pubDoc.prototype.combineTypeStrings = function() {
-    cordpub.pubString = [];
+pubDoc.prototype.printTable = function() {
     for (var key in cordpub.stringsByType) {
-        if (formats.hasOwnProperty(key)) {
-            cordpub.pubString.push('<div id="' + key + '-header" class="key-header">')
-            cordpub.pubString.push(key)
-            cordpub.pubString.push('</div>')
-            cordpub.pubString.push('<div id="' + key + '" class="div-table">')
-            cordpub.pubString.push(cordpub.stringsByType[key].join(''))
-            cordpub.pubString.push('</div>')
+        if (cordpub.formats.hasOwnProperty(key)) {
+            d3.select("#" + key)
+            .html("")
+            if (cordpub.stringsByType[key].length>0) {
+                // add publications
+                d3.select("#" + key)
+                    .selectAll("div")
+                    .data(cordpub.stringsByType[key])
+                    .enter()
+                    .append("div")
+                    .html(function(d) {
+                        return d;
+                    })
+                    .attr("id", key + "-entries")
+                    .attr("class", "div-table");
+
+                // add headers
+                d3.select("#" + key)
+                    .insert("div",":first-child")
+                    .attr("id", key + "-header")
+                    .attr("class", "key-header")
+                    .text(key);
+            }
         }
     }
-    cordpub.pubString = cordpub.pubString.join('');
 }
 
 pubDoc.prototype.createStrings = function() {
+    /*
+    Loops through dataTable and applies format template to each row.
+    */
+
     cordpub.initalizeTypeData();
 
     // loop through row data
@@ -134,7 +225,7 @@ pubDoc.prototype.createStrings = function() {
         cordpub.typeCount[pubType]++;
 
         // extract template
-        var current = formats[pubType];
+        var current = cordpub.formats[pubType];
 
         // replace counter in template
         current = current.replace(
@@ -155,48 +246,80 @@ pubDoc.prototype.createStrings = function() {
         }
         cordpub.stringsByType[pubType].push(current);
     }
-    cordpub.combineTypeStrings()
     console.log(cordpub.pubString);
-
-    document.getElementById('list').innerHTML = cordpub.pubString;
 }
 
-pubDoc.prototype.handle_getPubs = function(dataTable) {
-    console.log("handle_getPubs");
-    cordpub.dataTable = dataTable;
-    cordpub.createLabels();
-    console.log(cordpub.columsArray);
-    console.log(cordpub.columsByName);
-    cordpub.createStrings();
-
-
-
-    cordpub.createTwoDNamedArrayFromTable();
-
-    drawChordPlot(cordpub.authorGraph, 'qq');
-    drawAuthorList(cordpub.authorGraph, 'visualization');
-}
-
-pubDoc.prototype.queryBase = function(query_text, callback) {
+pubDoc.prototype.queryBase = function(queryText, callback) {
     var baseURL = 'http://docs.google.com/spreadsheet/tq?key=';
-    this.query = new google.visualization.Query(baseURL + this.key);
-    console.log(baseURL + this.key);
-    this.query.setQuery(query_text);
+    var query = new google.visualization.Query(baseURL + cordpub.key);
+    console.log(baseURL + cordpub.key);
+    console.log(columnifyQuery(queryText));
 
-    this.query.send(function(response) {
+    query.setQuery(columnifyQuery(queryText));
+
+    query.send(function(response) {
         callback(response.getDataTable());
     });
 }
 
 pubDoc.prototype.getAllPubs = function() {
-    console.log("getAllPubs");
-    console.log(this);
     this.queryBase(
-        "SELECT * order by A asc, D desc, E desc",
+        "select * order by %%Year%% desc, %%Month%% desc",
         this.handle_getPubs);
 }
 
+pubDoc.prototype.getPubsForAuthor = function(author) {
+    cordpub.queryBase(
+        "select * where %%Authors%% contains '" + author + "' order by %%Year%% desc, %%Month%% desc",
+        cordpub.handle_getPubs);
+}
+
+pubDoc.prototype.getPubsForYear = function(year) {
+    cordpub.queryBase(
+        "select * where %%Year%% = " + year + " order by %%Year%% desc, %%Month%% desc",
+        cordpub.handle_getPubs);
+}
+
+pubDoc.prototype.getPubsForVenue = function(venue) {
+    this.queryBase(
+        "select * where %%Venue%% = " + venue + " order by %%Year%% desc, %%Month%% desc",
+        this.handle_getPubs);
+}
+
+pubDoc.prototype.handle_getPubs = function(dataTable) {
+    cordpub.dataTable = dataTable;
+
+    // find publication types
+    cordpub.createLabels();
+
+    // use format template to make html rows for each publication
+    cordpub.createStrings();
+
+    // print table to page
+    cordpub.printTable();
+
+    if (cordpub.cord_plot_div || cordpub.author_list_div) {
+        // create author graph
+        cordpub.createTwoDNamedArrayFromTable();
+        console.log(cordpub.authorGraph);
+    }
+
+    if (cordpub.cord_plot_div) {
+        console.log(cordpub.cord_plot_div)
+        // draw cord plot
+        drawChordPlot(cordpub.authorGraph, cordpub.cord_plot_div);
+    }
+
+    if (cordpub.author_list_div) {
+        console.log(cordpub.author_list_div)
+        // draw author links
+        drawAuthorList(cordpub.authorGraph, cordpub.author_list_div);
+    }
+}
+
 pubDoc.prototype.createTwoDNamedArrayFromTable = function() {
+
+    cordpub.authorGraph = new TwoDNamedArray();
     // loop through each row
     for (var row = 0; row < cordpub.dataTable.getNumberOfRows(); row++) {
         var author_list =
@@ -207,10 +330,10 @@ pubDoc.prototype.createTwoDNamedArrayFromTable = function() {
         // create weights for the symetric graph
         for (var arow = 0; arow < num_authors; arow++) {
             for (var acol = 0; acol < num_authors; acol++) {
-                var currentWeight = this.authorGraph.getVal(
+                var currentWeight = cordpub.authorGraph.getVal(
                     author_list[arow],
                     author_list[acol]);
-                this.authorGraph.setVal(
+                cordpub.authorGraph.setVal(
                     author_list[arow],
                     author_list[acol],
                     1 / (num_authors) + currentWeight);
@@ -242,39 +365,31 @@ function handle_getVenues(response) {
 }
 
 function mouseHoverSVG(i, out) {
+    d3.select('#'+cordpub.author_list_div)
+        .select("#aut" + i)
+        .style("background-color", out ? 'transparent' : cordpub.colorRange(i));
 
-    d3
-        .select('#aut' + i)
-        .style("background-color", out ? 'transparent' : colorRange.range()[i % 20]);
-
-    d3
-        .select('#mainSVG')
+    d3.select('#'+cordpub.cord_plot_div)
         .selectAll("g.chord path")
         .filter(function(d) {
             return d.source.index != i && d.target.index != i;
         })
         .transition()
         .style("opacity", out ? 1 : .1);
-
 }
 
 function nameClick(i) {
-    //     var form = document.getElementById('aut'+i);
-    //     var name = form.innerHTML;
-    //     var cols = ['N', 'or O', 'or P', 'or Q', 'or R', 'or S'];
-    //     var str = '';
-    //     for (kk = 0; kk < cols.length; kk++) {
-    //         str = str + cols[kk] + "='" + name + "' ";
-    //     }
-    // drawVis('SELECT * where ' + str + ' order by A asc,D desc, E desc', 'all',name);
+    var name = d3.select('#'+cordpub.author_list_div).select("#aut" + i).text();
+    cordpub.getPubsForAuthor(name);
     console.log(i + " was clicked");
 }
 
 
-function drawChordPlot(data, id) {
+function drawChordPlot(data, id, hoverCallback, clickCallback) {
     /*
     Adds Chord diagram plot to element "id"
     Width and height of diagram are inherited from element css
+    Code based on http://bl.ocks.org/mbostock/4062006
 
     Inputs:
     id = element id where plot is created
@@ -319,7 +434,7 @@ function drawChordPlot(data, id) {
         .enter()
         .append("path")
         .style("fill", function(d) {
-            return colorRange(d.target.index);
+            return cordpub.colorRange(d.target.index);
         })
         .attr("d", d3.svg.chord().radius(innerRadius))
         .style("opacity", 1);
@@ -332,10 +447,10 @@ function drawChordPlot(data, id) {
         .enter()
         .append("path")
         .style("fill", function(d) {
-            return colorRange(d.index);
+            return cordpub.colorRange(d.index);
         })
         .style("stroke", function(d) {
-            return colorRange(d.index);
+            return cordpub.colorRange(d.index);
         })
         .attr("d", d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius))
         .on("mouseover", function(g, i) {
@@ -380,7 +495,8 @@ function drawChordPlot(data, id) {
         .on("mousedown", function(g, i) {
             nameClick(i);
         })
-        .style("cursor", "default");
+        .style("cursor", "default")
+        .attr("class", "chord_labels");
 
 
     // Remove the labels that don't fit
@@ -427,7 +543,8 @@ function drawChordPlot(data, id) {
         })
         .text(function(d) {
             return d.label;
-        });
+        })
+        .attr("class", "tick_labels");
 
     // Define tick locations
     function groupTicks(d) {
@@ -455,8 +572,7 @@ function drawAuthorList(data, id) {
     var myNode = document.getElementById(id);
     myNode.innerHTML = '';
 
-    d3
-        .select("#" + id)
+    d3.select("#" + id)
         .selectAll("div")
         .data(out.labels)
         .enter()
