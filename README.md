@@ -2,6 +2,8 @@
 
 A javascript library for making formated tables using data from Google sheets.  
 
+![image](https://cloud.githubusercontent.com/assets/2158394/11460933/de36ad90-96c5-11e5-93ce-0759efbf497d.png)
+
 ## Requirements
 - d3.js: http://d3js.org/d3.v3.js
 - Google Visualization API: http://www.google.com/jsapi
@@ -59,5 +61,8 @@ formats = {
       d3.scale.category20c() // d3 color scale or list of color strings
   );
 ```
+
+## Examples
+See the `examples/` folder.
 
 
