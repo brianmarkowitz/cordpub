@@ -225,6 +225,11 @@ pubDoc.prototype.createStrings = function() {
         cordpub.typeCount[pubType]++;
 
         // extract template
+        if (!(pubType in cordpub.formats)) {
+            console.log("**Error**")
+            console.log(pubType + " is not in Google Sheet " + cordpub.key);
+        }
+
         var current = cordpub.formats[pubType];
 
         // replace counter in template
