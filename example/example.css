@@ -1,6 +1,16 @@
-td {
+
+
+
+#author_list, #chord_vis, #pub_list {
     padding: 5px;
+    clear: both;
+    overflow: hidden;
+    width: 700px;
 }
+#chord_vis {
+    height: 500px;
+}
+
 #chart {
     font: 10px sans-serif;
     float: left;
@@ -10,36 +20,10 @@ td {
     stroke: #000;
     stroke-width: .5px;
 }
-#all {
-    background-color: black;
-    color: white;
-    float: left;
-    padding: 5px;
+.chord_labels, .tick_labels {
+    font-size: smaller;
 }
-.bars {
-    background-color: LightCoral;
-    padding: 5px;
-    float: left;
-}
-#nameHodler {
-    float: left;
-    padding: 30px;
-}
-#visualization #qq {
-    padding: 5px;
-    clear: both;
-}
-#qq {
-    clear: both;
-    width: 500px;
-    height: 500px;
-}
-#nameTitle {
-    font-weight: bold;
-}
-#yearTitle {
-    font-weight: bold;
-}
+
 .author_box {
     cursor: default;
     width: 120px;
@@ -47,10 +31,18 @@ td {
     float: left;
 }
 
+ a[href='https://scholar.google.com/scholar?cites='] {
+    pointer-events:none;
+    color: inherit;
+    text-decoration: inherit;
+    font-weight: inherit;
+}
+
+
 .div-table{
   display:table;
   width:auto;
-  border-spacing:5px;/*cellspacing:poor IE support for  this*/
+  border-spacing:5px;
 }
 .row{
   display:table-row;
@@ -61,11 +53,15 @@ td {
   display:inline-block;
 }
 .citation{
-  width: 93%;
+  width: 650px;
   vertical-align: top;
 }
 .type_count{
-  width: 7%;
+  width: 40px;
+}
+
+.citation_block{
+    clear:both;
 }
 
 

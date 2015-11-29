@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+    <title>Example</title>
+    <link rel="stylesheet" type="text/css" href="example.css">
+    <script type="text/javascript" src="http://d3js.org/d3.v2.js" charset="utf-8"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi?fake=.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../cord-pub.js" charset="utf-8"></script>
+</head>
+<body>
+    <div id="pub_list">
+        <div id="Talk" class="citation_block"></div>
+        <div id="Conference" class="citation_block"></div>
+        <div id="Patent" class="citation_block"></div>
+        <div id="Thesis" class="citation_block"></div>
+    </div>
+
+</div>
+    <script type="text/javascript">
+
+        // google sheet at https://docs.google.com/spreadsheets/d/1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw
+        var formats = {
+            "Talks": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">"%%Title%%," %%Venue%%, %%Location%%, %%Month%% %%Year%%.</div></div>'
+        };
+
+        cordpub.init(
+            '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw&gid=1096505934',
+            formats,
+            false,
+            false,
+            false
+        );
+            </script>
+
+</body>

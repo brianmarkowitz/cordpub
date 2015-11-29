@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+    <title>Example</title>
+    <link rel="stylesheet" type="text/css" href="example.css">
+    <script type="text/javascript" src="http://d3js.org/d3.v2.js" charset="utf-8"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi?fake=.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../cord-pub.js" charset="utf-8"></script>
+</head>
+<body>
+    <div id="chord_vis"></div>
+    <div id="author_list"></div>
+    <div id="pub_list">
+        <div id="Journal" class="citation_block"></div>
+        <div id="Conference" class="citation_block"></div>
+        <div id="Patent" class="citation_block"></div>
+        <div id="Thesis" class="citation_block"></div>
+    </div>
+
+</div>
+    <script type="text/javascript">
+
+        // google sheet at https://docs.google.com/spreadsheets/d/1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw
+        var formats = {
+            "Patent": '<div class="row"><div class="type_count col">[P%%Counter%%]</div><div class="citation col">%%Authors%%, %%Title%%, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>',
+            "Conference": '<div class="row"><div class="type_count col">[C%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," in <i>Proc. %%Venue%%</i>, pp. %%Pages%%, %%Location%%, %%Month%% %%Year%%.<br>[<a href="https://scholar.google.com/scholar?cites=%%Google_ID%%">cites</a>]</div></div>',
+            "Journal": '<div class="row"><div class="type_count col">[J%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," <i>%%Venue%%</i>, vol. %%Volume%%, no. %%Number%%, pp. %%Pages%%, %%Month%% %%Year%%.<br>[<a href="https://scholar.google.com/scholar?cites=%%Google_ID%%">cites</a>]</div></div>',
+            "Thesis": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">%%Authors%%, <i>%%Title%%</i>, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
+        };
+
+        cordpub.init(
+            '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw',
+            formats,
+            "author_list",
+            "chord_vis",
+            d3.scale.category20c()
+        );
+            </script>
+
+</body>
