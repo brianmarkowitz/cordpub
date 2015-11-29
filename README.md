@@ -1,6 +1,6 @@
 ## cord-pub.js
 
-A javascript library for making formated tables using data from Google sheets.  
+A javascript library for making formated tables using data from Google Sheets.  
 
 ![image](https://cloud.githubusercontent.com/assets/2158394/11460933/de36ad90-96c5-11e5-93ce-0759efbf497d.png)
 
