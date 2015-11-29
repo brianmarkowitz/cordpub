@@ -63,6 +63,6 @@ formats = {
 ```
 
 ## Examples
-See the `examples/` folder.
+See the `example/` folder.
 
 
