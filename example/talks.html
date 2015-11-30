@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="example.css">
     <script type="text/javascript" src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi" charset="utf-8"></script>
-    <script type="text/javascript" src="../cord-pub.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../cordpub.js" charset="utf-8"></script>
 </head>
 <body>
     <div id="pub_list">
@@ -14,13 +14,16 @@
     <script type="text/javascript">
 
         // google sheet at https://docs.google.com/spreadsheets/d/1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw
-        var formats = {
-            "Talks": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">"%%Title%%," %%Venue%%, %%Location%%, %%Month%% %%Year%%.</div></div>'
-        };
 
-        cordpub.init(
+        var formats_talks = {
+            "Talks": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">"%%Title%%," %%Venue%%, %%Location%%, %%Month%% %%Year%%.</div></div>'
+        }
+
+
+        var talk_list = new cordpub.cordpub();
+        talk_list.init(
             '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw&gid=1096505934',
-            formats,
+            formats_talks,
             false,
             false,
             false

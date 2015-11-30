@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="example.css">
     <script type="text/javascript" src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi" charset="utf-8"></script>
-    <script type="text/javascript" src="../cord-pub.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../cordpub.js" charset="utf-8"></script>
 </head>
 <body>
     <div id="chord_vis"></div>
@@ -14,7 +14,10 @@
         <div id="Conference" class="citation_block"></div>
         <div id="Patent" class="citation_block"></div>
         <div id="Thesis" class="citation_block"></div>
+        <div id="Talks" class="citation_block"></div>
     </div>
+
+
 
 </div>
     <script type="text/javascript">
@@ -27,12 +30,27 @@
             "Thesis": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">%%Authors%%, <i>%%Title%%</i>, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
         };
 
-        cordpub.init(
+        var formats_talks = {
+            "Talks": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">"%%Title%%," %%Venue%%, %%Location%%, %%Month%% %%Year%%.</div></div>'
+        }
+
+        var cord = new cordpub.cordpub();
+        cord.init(
             '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw',
             formats,
             "author_list",
             "chord_vis",
             d3.scale.category20c()
+        );
+
+
+        var talk_list = new cordpub.cordpub();
+        talk_list.init(
+            '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw&gid=1096505934',
+            formats_talks,
+            false,
+            false,
+            false
         );
             </script>
 
