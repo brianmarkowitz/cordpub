@@ -138,12 +138,14 @@ var cordpub = (function() {
                         .attr("id", key + "-entries")
                         .attr("class", "div-table");
 
-                    // add headers
-                    d3.select("#" + key)
-                        .insert("div", ":first-child")
-                        .attr("id", key + "-header")
-                        .attr("class", "key-header")
-                        .text(key);
+                    if (this.print_headers) {
+                        // add headers
+                        d3.select("#" + key)
+                            .insert("div", ":first-child")
+                            .attr("id", key + "-header")
+                            .attr("class", "key-header")
+                            .text(key);
+                    }
                 }
             }
         }
@@ -290,7 +292,8 @@ var cordpub = (function() {
         formats,
         author_list_div,
         cord_plot_div,
-        colorRange) {
+        colorRange,
+        print_headers) {
 
 
         // INPUTS
@@ -324,6 +327,7 @@ var cordpub = (function() {
 
         this.author_list_div = author_list_div;
         this.cord_plot_div = cord_plot_div;
+        this.print_headers = print_headers;
 
         if (colorRange) {
             // convert list to d3 color scale
