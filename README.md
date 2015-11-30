@@ -1,4 +1,4 @@
-## cord-pub.js
+## cordpub.js
 
 A javascript library for making formated tables using data from Google Sheets.  
 
@@ -20,7 +20,7 @@ Include d3 and google jsapi in the html header
 ```html
 <script type="text/javascript" src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
 <script type="text/javascript" src="http://www.google.com/jsapi" charset="utf-8"></script>
-<script type="text/javascript" src="cord-pub.js" charset="utf-8"></script>
+<script type="text/javascript" src="cordpub.js" charset="utf-8"></script>
 ```
 
 ### Initialize
@@ -53,12 +53,14 @@ formats = {
 ### Start cord-pub
 
 ```js
-  cordpub.init(
+var cord = new cordpub.cordpub();
+cord.init(
       '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw', // google sheets key
       formats, // json of templates
       "author_list", // div id of author list 
       "chord_vis", // div id of chors
-      d3.scale.category20c() // d3 color scale or list of color strings
+      d3.scale.category20c(), // d3 color scale or list of color strings
+      true // print headers
   );
 ```
 
