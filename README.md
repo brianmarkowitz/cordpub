@@ -60,7 +60,8 @@ cord.init(
       "author_list", // div id of author list 
       "chord_vis", // div id of chors
       d3.scale.category20c(), // d3 color scale or list of color strings
-      true // print headers
+      true, // print headers,
+      "order by %%Year%% desc, %%Month%% desc"  // sort clause
   );
 ```
 

@@ -209,25 +209,25 @@ var cordpub = (function() {
 
     pubDoc.prototype.getAllPubs = function() {
         this.queryBase(
-            "select * order by %%Year%% desc, %%Month%% desc",
+            "select * " + this.sort_clause,
             this.handle_getPubs);
     }
 
     pubDoc.prototype.getPubsForAuthor = function(author) {
         this.queryBase(
-            "select * where %%Authors%% contains '" + author + "' order by %%Year%% desc, %%Month%% desc",
+            "select * where %%Authors%% contains '" + author + "' " + this.sort_clause,
             this.handle_getPubs);
     }
 
     pubDoc.prototype.getPubsForYear = function(year) {
         this.queryBase(
-            "select * where %%Year%% = " + year + " order by %%Year%% desc, %%Month%% desc",
+            "select * where %%Year%% = " + year + " " + this.sort_clause,
             this.handle_getPubs);
     }
 
     pubDoc.prototype.getPubsForVenue = function(venue) {
         this.queryBase(
-            "select * where %%Venue%% = " + venue + " order by %%Year%% desc, %%Month%% desc",
+            "select * where %%Venue%% = " + venue + " " + this.sort_clause,
             this.handle_getPubs);
     }
 
@@ -293,7 +293,8 @@ var cordpub = (function() {
         author_list_div,
         cord_plot_div,
         colorRange,
-        print_headers) {
+        print_headers,
+        sort_clause) {
 
 
         // INPUTS
@@ -328,6 +329,9 @@ var cordpub = (function() {
         this.author_list_div = author_list_div;
         this.cord_plot_div = cord_plot_div;
         this.print_headers = print_headers;
+
+
+        this.sort_clause = sort_clause;
 
         if (colorRange) {
             // convert list to d3 color scale
