@@ -32,16 +32,6 @@ var cordpub = (function() {
         return letter;
     }
 
-    function range(start, stop, step) {
-        var a = [start],
-            b = start;
-        while (b < stop) {
-            b += step;
-            a.push(b)
-        }
-        return a;
-    };
-
     var formatValues = {
         Authors: function(value) {
             var author_list = value.split(",");
@@ -337,7 +327,7 @@ var cordpub = (function() {
             // convert list to d3 color scale
             if (typeof colorRange != "function") {
                 colorRange = d3.scale.ordinal()
-                    .domain(range(0, colorRange.length, 1))
+                    .domain(d3.range(colorRange.length))
                     .range(colorRange);
             }
         }
