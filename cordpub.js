@@ -53,6 +53,67 @@ var cordpub = (function() {
 
     }
 
+    var formats = {
+        "Patent": '<div class="row"><div class="type_count col">[P%%Counter%%]</div><div class="citation col">%%Authors%%, %%Title%%, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>',
+        "Conference": '<div class="row"><div class="type_count col">[C%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," in <i>Proc. %%Venue%%</i>, pp. %%Pages%%, %%Location%%, %%Month%% %%Year%%.<br>[<a href="https://scholar.google.com/scholar?cites=%%Google_ID%%">cites</a>]</div></div>',
+        "Journal": '<div class="row"><div class="type_count col">[J%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," <i>%%Venue%%</i>, vol. %%Volume%%, no. %%Number%%, pp. %%Pages%%, %%Month%% %%Year%%.<br>[<a href="https://scholar.google.com/scholar?cites=%%Google_ID%%">cites</a>]</div></div>',
+        "Thesis": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">%%Authors%%, <i>%%Title%%</i>, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
+    };
+
+
+
+    var defaults = {
+            "key":'1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw',
+            "formats": formats,
+            "author_list_div": false,
+            "cord_plot_div": false,
+            "colorRange": false,
+            "print_headers": false,
+            "sort_clause": "order by %%Year%% asc, %%Month%% asc"
+        };
+
+    defaults.addVals = function(obj) {
+       for (var i in obj) {
+          if (obj.hasOwnProperty(i)) {
+             this[i] = obj[i];
+          }
+       }
+       return this
+    };
+
+    function pubDoc(opts) {
+
+        // INPUTS
+        // key = google sheets key
+        //     add "&gid=[gid]" to query a sheet other than the first sheet
+        // formats = json of publication type templates
+        // author_list_div = name of div id for author list; or false to not show
+        // cord_plot_div = name of div id for cord plot; or false to not show
+        // colorRange = list of colors or d3 color scale
+
+
+        // Example arguments:
+        // colorRange = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+        //   or
+        // colorRange = d3.scale.category10()
+
+        // formats = {
+        //         "Journal": '<div class="row"><div class="type_count col">[J%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," <i>%%Venue%%</i>, vol. %%Volume%%, no. %%Number%%, pp. %%Pages%%, %%Month%% %%Year%%.</div></div>',
+        //         "Patent": '<div class="row"><div class="type_count col">[P%%Counter%%]</div><div class="citation col">%%Authors%%, %%Title%%, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
+        //     }
+
+
+        this.pubs = {};
+        this.authors = {};
+        this.year = {};
+        this.venues = {};
+        this.authorGraph = new TwoDNamedArray();
+        this.columsByName = {};
+        this.columsArray = [];
+        this.settings = defaults.addVals(opts);
+    }
+
+
     pubDoc.prototype.columnifyQuery = function(queryText) {
         /*
         Converts a string like
@@ -69,18 +130,6 @@ var cordpub = (function() {
         return queryText
 
     }
-
-
-    function pubDoc() {
-        this.pubs = {};
-        this.authors = {};
-        this.year = {};
-        this.venues = {};
-        this.authorGraph = new TwoDNamedArray();
-        this.columsByName = {};
-        this.columsArray = [];
-    }
-
 
     pubDoc.prototype.createLabels = function() {
         // loop through publication types and store as two jsons
@@ -277,61 +326,32 @@ var cordpub = (function() {
     }
 
 
-    pubDoc.prototype.init = function(
-        key,
-        formats,
-        author_list_div,
-        cord_plot_div,
-        colorRange,
-        print_headers,
-        sort_clause) {
-
-
-        // INPUTS
-        // key = google sheets key
-        //     add "&gid=[gid]" to query a sheet other than the first sheet
-        // formats = json of publication type templates
-        // author_list_div = name of div id for author list; or false to not show
-        // cord_plot_div = name of div id for cord plot; or false to not show
-        // colorRange = list of colors or d3 color scale
-
-
-        // Example arguments:
-        // colorRange = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
-        //   or
-        // colorRange = d3.scale.category10()
-
-        // formats = {
-        //         "Journal": '<div class="row"><div class="type_count col">[J%%Counter%%]</div><div class="citation col">%%Authors%%, "%%Title%%," <i>%%Venue%%</i>, vol. %%Volume%%, no. %%Number%%, pp. %%Pages%%, %%Month%% %%Year%%.</div></div>',
-        //         "Patent": '<div class="row"><div class="type_count col">[P%%Counter%%]</div><div class="citation col">%%Authors%%, %%Title%%, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
-        //     }
-
-
-
+    pubDoc.prototype.init = function() {
 
         // google sheets key
-        this.key = key;
+        this.key = this.settings.key;
 
         // json of formats for each document type
         // prints data to div with id equal to json key
-        this.formats = formats;
+        console.log(this.settings)
+        this.formats = this.settings.formats;
 
-        this.author_list_div = author_list_div;
-        this.cord_plot_div = cord_plot_div;
-        this.print_headers = print_headers;
+        this.author_list_div = this.settings.author_list_div;
+        this.cord_plot_div = this.settings.cord_plot_div;
+        this.print_headers = this.settings.print_headers;
 
 
-        this.sort_clause = sort_clause;
+        this.sort_clause = this.settings.sort_clause;
 
-        if (colorRange) {
+        if (this.settings.colorRange) {
             // convert list to d3 color scale
-            if (typeof colorRange != "function") {
-                colorRange = d3.scale.ordinal()
-                    .domain(d3.range(colorRange.length))
-                    .range(colorRange);
+            if (typeof this.settings.colorRange != "function") {
+                this.settings.colorRange = d3.scale.ordinal()
+                    .domain(d3.range(this.settings.colorRange.length))
+                    .range(this.settings.colorRange);
             }
         }
-        this.colorRange = colorRange
+        this.colorRange = this.settings.colorRange
 
         this.queryBase(
             "select * limit 1",
@@ -649,8 +669,8 @@ var cordpub = (function() {
     }
 
     return {
-        cordpub: function() {
-            return new pubDoc;
+        cordpub: function(opts) {
+            return new pubDoc(opts);
         }
     }
 }());

@@ -34,28 +34,27 @@
             "Talks": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">"%%Title%%," %%Venue%%, %%Location%%, %%Month%% %%Year%%.</div></div>'
         }
 
-        var cord = new cordpub.cordpub();
-        cord.init(
-            '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw',
-            formats,
-            "author_list",
-            "chord_vis",
-            d3.scale.category20c(),
-            true,
-            "order by %%Year%% asc, %%Month%% asc"
-        );
+        var cord = new cordpub.cordpub({
+            "key":'1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw',
+            "formats": formats,
+            "author_list_div": "author_list",
+            "cord_plot_div": "chord_vis",
+            "colorRange": d3.scale.category20c(),
+            "print_headers": true,
+            "sort_clause": "order by %%Year%% asc, %%Month%% asc"
+        });
+        cord.init();
 
 
-        var talk_list = new cordpub.cordpub();
-        talk_list.init(
-            '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw&gid=1096505934',
-            formats_talks,
-            false,
-            false,
-            false,
-            true,
-            "order by %%Year%% desc, %%Month%% desc"
-        );
+        var talk_list = new cordpub.cordpub({
+            "key":'1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw&gid=1096505934',
+            "formats": formats_talks,
+            "author_list_div": false,
+            "cord_plot_div": false,
+            "colorRange": false,
+            "print_headers": true
+        });
+        talk_list.init();
             </script>
 
 </body>

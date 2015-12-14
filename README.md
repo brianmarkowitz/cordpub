@@ -53,16 +53,16 @@ formats = {
 ### Start cord-pub
 
 ```js
-var cord = new cordpub.cordpub();
-cord.init(
-      '1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw', // google sheets key
-      formats, // json of templates
-      "author_list", // div id of author list 
-      "chord_vis", // div id of chors
-      d3.scale.category20c(), // d3 color scale or list of color strings
-      true, // print headers,
-      "order by %%Year%% desc, %%Month%% desc"  // sort clause
-  );
+var cord = new cordpub.cordpub({
+    "key":'1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw',
+    "formats": formats,
+    "author_list_div": "author_list",
+    "cord_plot_div": "chord_vis",
+    "colorRange": d3.scale.category20c(),
+    "print_headers": true,
+    "sort_clause": "order by %%Year%% asc, %%Month%% asc"
+});
+cord.init();
 ```
 
 ## Examples
