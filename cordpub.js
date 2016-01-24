@@ -34,7 +34,15 @@ var cordpub = (function() {
 
     var formatValues = {
         Authors: function(value) {
-            var author_list = value.split(",");
+            var out = value.split(",");
+            var author_list = [];
+
+            // exclude extra commas
+            for (k in out){
+                if (out[k].length>2){
+                    author_list.push(out[k]);
+                }
+            }
             var num_authors = author_list.length;
             if (num_authors > 1) {
                 return (author_list
@@ -60,7 +68,7 @@ var cordpub = (function() {
         "Thesis": '<div class="row"><div class="type_count col">[T%%Counter%%]</div><div class="citation col">%%Authors%%, <i>%%Title%%</i>, %%Misc_Description%%, %%Month%% %%Year%%.</div></div>'
     };
 
-
+    default_render_cb = function() {}
 
     var defaults = {
             "key":'1hkE7P_fHrtiIFAx53xDyUl3gNOp4MSIYLrEwZIJWcaw',
@@ -69,7 +77,8 @@ var cordpub = (function() {
             "cord_plot_div": false,
             "colorRange": false,
             "print_headers": false,
-            "sort_clause": "order by %%Year%% asc, %%Month%% asc"
+            "sort_clause": "order by %%Year%% asc, %%Month%% asc",
+            "render_callback": default_render_cb
         };
 
     defaults.addVals = function(obj) {
@@ -183,7 +192,7 @@ var cordpub = (function() {
                             .insert("div", ":first-child")
                             .attr("id", key + "-header")
                             .attr("class", "key-header")
-                            .text(key);
+                            .text(key.replace("_"," "));
                     }
                 }
             }
@@ -240,7 +249,6 @@ var cordpub = (function() {
         var query = new google.visualization.Query(baseURL + this.key);
         var th = this
         query.setQuery(this.columnifyQuery(queryText));
-
         query.send(function(response) {
             callback(response.getDataTable(), th);
         });
@@ -298,6 +306,9 @@ var cordpub = (function() {
             // draw author links
             th.drawAuthorList(th.authorGraph, th.author_list_div);
         }
+
+        th.settings.render_callback();
+
     }
 
     pubDoc.prototype.createTwoDNamedArrayFromTable = function() {
@@ -305,9 +316,17 @@ var cordpub = (function() {
         this.authorGraph = new TwoDNamedArray();
         // loop through each row
         for (var row = 0; row < this.dataTable.getNumberOfRows(); row++) {
-            var author_list =
+            var out =
                 this.dataTable.getFormattedValue(row, this.columsByName.Authors)
                 .split(',');
+            var author_list = [];
+
+            // exclude extra commas
+            for (k in out){
+                if (out[k].length>2){
+                    author_list.push(out[k]);
+                }
+            }
             var num_authors = author_list.length;
 
             // create weights for the symetric graph
